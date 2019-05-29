@@ -1,3 +1,24 @@
 <script>
-    alert("Now we're cooking");
+    // alert("Now we're cooking");
+
+    window.addEventListener("load", loaded);
+    
+    async function loaded(){
+        const result = await fetch("/timestamp").then(r=>r.json());
+
+        const {date, last_date, start_date} = result;
+
+        document.querySelector("#result").innerHTML = `
+            date: ${date}
+            <br>
+            last_date: ${last_date}
+            <br>
+            start_date: ${start_date}`;
+    }
 </script>
+
+<body>
+    <div>hello world</div>
+    <br>
+    <div id="result">Loading</div>
+</body>
