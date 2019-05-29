@@ -63,3 +63,7 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# drew
+set_variables.sh
+.runtimeconfig.json

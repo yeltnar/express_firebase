@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "firebase serve --only functions,hosting",
-    "deploy": "firebase deploy"
+    "start": "firebase functions:config:get > functions/.runtimeconfig.json && firebase serve",
+    "deploy": "firebase deploy",
+    "_set_example": "firebase functions:config:set x.y='asdff'",
+    "set_variables":"./set_variables.sh"
   },
   "author": "",
   "license": "ISC"

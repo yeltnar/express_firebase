@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const firebase = require('firebase');
+const admin = require('firebase-admin');
 const express = require("express");
 
 var config = {
@@ -12,12 +13,13 @@ firebase.initializeApp(config);
 
 
 const fb_db = firebase.database();
-
 const app = express();
+
+const ON_CLOUD = process.env.X_GOOGLE_ENTRY_POINT !== undefined;
 
 let last_date = "undefined";
 
-const start_date = new Date();
+const start_date = new Date().toString();
 
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
@@ -30,24 +32,61 @@ app.get("/timestamp",(req, res, next)=>{
 });
 
 app.get("/runtime_vars", (req, res, next)=>{
-    res.json({
-        err:"You haven't done this yet silly! Also, this can't exist in new SW so I'll crash now.",
-    });
-    process.exit();
+
+    const to_send = {
+        config: functions.config(),
+        // env: process.env,
+        ON_CLOUD,
+        should_crash: functions.config().system.should_crash,
+    };
+
+    console.log("hello there ");
+
+    if( functions.config().system.should_crash===true || functions.config().system.should_crash==="true" ){
+
+        to_send.err = "You haven't done this yet silly! Also, this can't exist in new SW so I'll crash now.";
+        
+        delete to_send.config;
+        delete to_send.env;
+        
+        res.json(to_send);
+
+        process.exit();
+        console.log("crashing");
+
+    }else{
+        res.json(to_send);
+    }
+
+    
 });
 
 app.get("/database", async(req, res, next)=>{
 
-    await fb_db.ref("/").set({
-        "date":new Date().toString()
-    });
+    try{
 
-    const snapshot = await fb_db.ref('/').once('value');
+        await fb_db.ref("/").set({
+            "date":new Date().toString()
+        });
 
-    res.json({
-        snapshot
-    });
+        const snapshot = await fb_db.ref('/').once('value');
+
+        res.json({
+            snapshot
+        });
+
+    }catch(err){
+        res.status(500).json({"err_bool":true,err});
+    }
 })
+
+// app.get("/stupid",(req, res, next)=>{
+//     res.json({r:admin.credential.applicationDefault()});
+// });
+
+app.get("/env",(req, res)=>{
+    res.json( process.env );
+});
 
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //     const date = new Date();
