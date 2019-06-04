@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const firebase = require('firebase');
-const admin = require('firebase-admin');
+// const admin = require('firebase-admin');
 const express = require("express");
 
 const {
@@ -24,10 +24,26 @@ var config = {
     databaseURL: "https://express-firebase-1aa17.firebaseio.com",
     // storageBucket: "bucket.appspot.com"
 };
+// console.log(functions.config().firebase);
+// process.exit();
+// firebase.initializeApp(functions.config().firebase);
 firebase.initializeApp(config);
 
 const fb_db = firebase.database();
 const app = express();
+
+exports.onMessageWrite = functions.database
+.ref("/date")
+.onWrite((snapshot, context)=>{
+    return new Promise((resolve, reject)=>{
+
+        console.log(snapshot);
+        console.log(context);
+        console.log("date changed!!!");
+
+        resolve();
+    });
+})
 
 const ON_CLOUD = process.env.X_GOOGLE_ENTRY_POINT !== undefined;
 
@@ -86,6 +102,8 @@ app.get("/runtime_vars", (req, res, next)=>{
 
 app.get("/database", async(req, res, next)=>{
 
+    console.log("running /database");
+
     try{
 
         await fb_db.ref("/date").set(new Date().toString());
@@ -97,7 +115,8 @@ app.get("/database", async(req, res, next)=>{
         });
 
     }catch(err){
-        res.status(500).json({"err_bool":true,err});
+        console.log(err);
+        return res.status(500).json({"err_bool":true,err});
     }
 })
 
