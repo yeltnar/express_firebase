@@ -98,7 +98,7 @@ async function setupPhoneWallpaperDBWatcher(){
         // console.log(ref);
         ref.onWrite(async(snapshot, context)=>{
             debug_global.snapshot = snapshot;
-            debug_global.context = context;;
+            debug_global.context = context;
             console.log("\n\n\nworked");
             console.log(debug_global);
             console.log("\n\n\n");

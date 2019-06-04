@@ -36,7 +36,7 @@ router.post("/current_wallpaper",async(req,res,next)=>{
     }
 
     const current_wallpaper = await setCurrentWallpaper({person_id, img_url, reddit_post});
-    res.json({current_wallpaper});
+    return res.json({current_wallpaper});
 });
 
 module.exports = {

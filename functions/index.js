@@ -118,6 +118,8 @@ app.get("/database", async(req, res, next)=>{
         console.log(err);
         return res.status(500).json({"err_bool":true,err});
     }
+
+    return;
 })
 
 // app.get("/stupid",(req, res, next)=>{
