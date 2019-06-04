@@ -87,5 +87,6 @@ function checkToken( person, token ){
 
 module.exports = {
     router,
-    checkRequestObject
+    checkRequestObject,
+    getPerson,
 };

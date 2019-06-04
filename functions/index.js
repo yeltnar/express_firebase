@@ -88,9 +88,7 @@ app.get("/database", async(req, res, next)=>{
 
     try{
 
-        await fb_db.ref("/").set({
-            "date":new Date().toString()
-        });
+        await fb_db.ref("/date").set(new Date().toString());
 
         const snapshot = await fb_db.ref('/').once('value');
 
