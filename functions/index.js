@@ -3,6 +3,16 @@ const firebase = require('firebase');
 const admin = require('firebase-admin');
 const express = require("express");
 
+const {
+    router:person_manager_router,
+    checkRequestObject:checkRequestObjectPersonManager
+} = require("./person_manager/person_manager");
+const {
+    router:slack_router
+} = require("./slack/slack");
+const {
+    unprotected_router:unprotected_automatic_router
+} = require("./automatic/automatic");
 var config = {
     // apiKey: "apiKey",
     authDomain: "express-firebase-1aa17.firebaseapp.com",
@@ -11,16 +21,15 @@ var config = {
 };
 firebase.initializeApp(config);
 
-
 const fb_db = firebase.database();
 const app = express();
 
 const ON_CLOUD = process.env.X_GOOGLE_ENTRY_POINT !== undefined;
 
 let last_date = "undefined";
-
 const start_date = new Date().toString();
 
+app.use( "/automatic",  unprotected_automatic_router);
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
     res.json({
@@ -31,6 +40,11 @@ app.get("/timestamp",(req, res, next)=>{
     last_date = date;
 });
 
+// everything after this will be protected
+app.use( checkRequestObjectPersonManager );
+
+app.use( "/person_manager", person_manager_router );
+app.use( "/slack", slack_router );
 app.get("/runtime_vars", (req, res, next)=>{
 
     const to_send = {
