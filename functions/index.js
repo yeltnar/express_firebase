@@ -13,6 +13,11 @@ const {
 const {
     unprotected_router:unprotected_automatic_router
 } = require("./automatic/automatic");
+const {
+    unprotected_router:unprotected_phone_manager_router,
+    router:phone_manager_router,
+} = require("./phone_manager/phone_manager.js");
+
 var config = {
     // apiKey: "apiKey",
     authDomain: "express-firebase-1aa17.firebaseapp.com",
@@ -30,6 +35,8 @@ let last_date = "undefined";
 const start_date = new Date().toString();
 
 app.use( "/automatic",  unprotected_automatic_router);
+app.use( "/phone",  unprotected_phone_manager_router);
+
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
     res.json({
@@ -45,6 +52,8 @@ app.use( checkRequestObjectPersonManager );
 
 app.use( "/person_manager", person_manager_router );
 app.use( "/slack", slack_router );
+app.use( "/phone",  phone_manager_router);
+
 app.get("/runtime_vars", (req, res, next)=>{
 
     const to_send = {
