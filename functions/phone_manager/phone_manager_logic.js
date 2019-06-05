@@ -65,15 +65,22 @@ async function setCurrentWallpaper({person_id, reddit_post, img_url}){
     let final_img_url = img_url;
 
     if( reddit_post!==undefined ){
+        console.log(`reddit_post is ${JSON.stringify(reddit_post)}`);
         final_img_url = getRedditImage(reddit_post);
     }
 
     let success = "undefined";
     let error = "undefined";
     try{
-        await callJoinSetWallpaper( person_id, final_img_url );
-        // save set wallpaper to DB, if success 
-        await getFBDB().ref(`${getWallpaperDBLocation(person_id)}/${WALLPAPER_KEY}`).set(final_img_url);
+
+        const promise_array = [];
+
+        promise_array.push( callJoinSetWallpaper( person_id, final_img_url ) );
+        promise_array.push( setDBCurrentWallpaper( person_id, final_img_url ) );
+        promise_array.push( updateRecentWallpaperArray( person_id, final_img_url ) );
+
+        await Promise.all();
+
         success = true;
         error = false;
         console.log("setting/saving reddit image success!");
@@ -162,30 +169,54 @@ module.exports = {
 };
 
 async function getNewRedditPost(){
-    const reddit_posts = await getRedditPosts();
+
+    const reddit_posts =  await(async()=>{
+
+        const promise_array = [];
+
+        promise_array.push( getRedditPosts({sub:"mostbeautiful"}) );
+        promise_array.push( getRedditPosts({sub:"earthporn"}) );
+
+        const [mostbeautiful_posts,earthporn_posts] = await Promise.all(promise_array);
+
+        return mostbeautiful_posts.concat(earthporn_posts);
+    })();
 
     console.warn("blindly returning top post at the moment");
 
-    // return reddit_posts!==undefined ? reddit_posts : "undefined";
-    // return reddit_posts.length || "undefined";
-    return reddit_posts[0] || "undefined";
+    const index = parseInt(Math.random()*reddit_posts.length);
+
+    console.log(`reddit_posts.length=${JSON.stringify(reddit_posts.length)}`)
+    console.log(`index=${index}`)
+    
+    return reddit_posts[index] || "undefined";
 }
 
-async function getRedditPosts({sub,sort,count,time}={sub:"earthporn", sort:"top", count:20, time:"day"}){
-    let result = await requestP(`https://www.reddit.com/r/${sub}/${sort}.json?count=${count}&t=${time}`);
+async function getRedditPosts({sub,sort,count,time}){
+
+    sub = sub!==undefined ? sub : "earthporn";
+    sort = sort!==undefined ? sort : "top";
+    count = count!==undefined ? count : 20;
+    time = time!==undefined ? time : "day";
+
+    const reddit_url = `https://www.reddit.com/r/${sub}/${sort}.json?count=${count}&t=${time}`;
+    console.log(JSON.stringify({reddit_url}));
+    let result = await requestP(reddit_url);
     result = JSON.parse(result);
     return result.data.children;
 }
-
 
 function getRedditImage( reddit_post ){
 
     let toReturn;
     
-    if( typeof reddit_post === "object" ){
+    if( reddit_post==="undefined" || reddit_post===undefined ){
+        throw new Error("reddit_post can not be undefined");
+    }else if( typeof reddit_post === "object" ){
         toReturn = reddit_post.data.url;
         console.log("got reddit post object");
     }else{
+        throw new Error("getRedditImage can not handle post links yet");
         const post_obj = getRedditPostFromUrl(reddit_post);
         toReturn = getRedditImage( post_obj );
         console.log("got reddit post url");
@@ -194,17 +225,10 @@ function getRedditImage( reddit_post ){
     return toReturn;
 }
 
+async function setDBCurrentWallpaper( person_id, final_img_url ){
+    await getFBDB().ref(`${getWallpaperDBLocation(person_id)}/${WALLPAPER_KEY}`).set(final_img_url);
+}
 
-/*
-
-await fb_db.ref("/").set({
-    "date":new Date().toString()
-});
-
-const snapshot = await fb_db.ref('/').once('value');
-
-res.json({
-    snapshot
-});
-
-*/
+async function updateRecentWallpaperArray( person_id, final_img_url ){
+    console.warn("updateRecentWallpaperArray is in development ");
+}
