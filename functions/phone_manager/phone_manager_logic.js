@@ -171,8 +171,8 @@ async function getNewRedditPost(){
     return reddit_posts[0] || "undefined";
 }
 
-async function getRedditPosts(){
-    let result = await requestP(`https://www.reddit.com/r/earthporn/top/.json?count=20&t=day`);
+async function getRedditPosts({sub,sort,count,time}={sub:"earthporn", sort:"top", count:20, time:"day"}){
+    let result = await requestP(`https://www.reddit.com/r/${sub}/${sort}.json?count=${count}&t=${time}`);
     result = JSON.parse(result);
     return result.data.children;
 }
