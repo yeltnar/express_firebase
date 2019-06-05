@@ -6,6 +6,8 @@ const ONE_MIN = ONE_SEC*60;
 const ONE_HR = ONE_MIN*60;
 const ONE_DAY = ONE_HR*24;
 
+return
+
 const interval_list = [
     {
         time:ONE_HR,
