@@ -38,7 +38,18 @@ async function getCurrentWallpaper( person_id ){
     }
 
     const current_wallpaper = decodeURIComponent(wallpaper_obj[WALLPAPER_KEY]) || "undefined";
+    return current_wallpaper;
+}
 
+async function getNewWallpaper(person_id){
+
+    if( person_id===undefined ){
+        throw new Error("person_id===undefined");
+    }
+
+    const reddit_post = await getNewRedditPost();
+
+    const {current_wallpaper,success} = await setCurrentWallpaper({person_id, reddit_post})
     return current_wallpaper;
 }
 
@@ -62,20 +73,27 @@ async function setCurrentWallpaper({person_id, reddit_post, img_url}){
     try{
         await callJoinSetWallpaper( person_id, final_img_url );
         // save set wallpaper to DB, if success 
-        getFBDB().ref(`${getWallpaperDBLocation(person_id)}/${WALLPAPER_KEY}`).set(final_img_url);
+        await getFBDB().ref(`${getWallpaperDBLocation(person_id)}/${WALLPAPER_KEY}`).set(final_img_url);
         success = true;
         error = false;
+        console.log("setting/saving reddit image success!");
     }catch(e){
         success = false;
         error = e;
+        console.error("error in setting/saving reddit image");
     }
 
     console.log("setCurrentWallpaper done");
 
-    return {
-        current_wallpaper:await getCurrentWallpaper(person_id),
-        success
+    const toReturn = {
+        current_wallpaper: await getCurrentWallpaper(person_id),
+        success,
+        error
     };
+
+    console.log({toReturn});
+
+    return toReturn ;
 }
 
 const debug_global = {};
@@ -111,8 +129,6 @@ async function setupPhoneWallpaperDBWatcher(){
     console.log("setupPhoneWallpaperDBWatcher end");
 }
 
-
-
 async function callJoinSetWallpaper( person_id, img_url ){
     const {apikey} = getPerson( person_id ).join;
     
@@ -140,13 +156,42 @@ async function callJoinSetWallpaper( person_id, img_url ){
 
 module.exports = {
     getCurrentWallpaper,
+    getNewWallpaper,
     setCurrentWallpaper,
     getDebugGlobal:()=>{return debug_global}
 };
 
+async function getNewRedditPost(){
+    const reddit_posts = await getRedditPosts();
+
+    console.warn("blindly returning top post at the moment");
+
+    // return reddit_posts!==undefined ? reddit_posts : "undefined";
+    // return reddit_posts.length || "undefined";
+    return reddit_posts[0] || "undefined";
+}
+
+async function getRedditPosts(){
+    let result = await requestP(`https://www.reddit.com/r/earthporn/top/.json?count=20&t=day`);
+    result = JSON.parse(result);
+    return result.data.children;
+}
+
+
 function getRedditImage( reddit_post ){
-    // TODO actually set image here 
-    return "https://www.google.com/images/hpp/pride_hpp_flagemojis_v1.jpg";
+
+    let toReturn;
+    
+    if( typeof reddit_post === "object" ){
+        toReturn = reddit_post.data.url;
+        console.log("got reddit post object");
+    }else{
+        const post_obj = getRedditPostFromUrl(reddit_post);
+        toReturn = getRedditImage( post_obj );
+        console.log("got reddit post url");
+    }
+
+    return toReturn;
 }
 
 

@@ -2,6 +2,7 @@ const express = require("express");
 
 const {
     getCurrentWallpaper,
+    getNewWallpaper,
     setCurrentWallpaper,
     getDebugGlobal
 } = require("./phone_manager_logic");
@@ -21,10 +22,18 @@ unprotected_router.all("/getDebugGlobal",(req, res)=>{
 router.all("/protected_test",(req,res,next)=>{
     res.json({"msg":"phone protected_test 200"});
 });
+
 router.get("/current_wallpaper",async(req,res,next)=>{
     const person = res.locals.person_id;
     const current_wallpaper = await getCurrentWallpaper(person);
     res.json({current_wallpaper});
+});
+router.get("/new_wallpaper",async(req,res,next)=>{
+    const person = res.locals.person_id;
+    const debug_result = await getNewWallpaper(person) || "no debug result";
+    res.json({debug_result});
+    // const current_wallpaper = await getNewWallpaper(person);
+    // res.json({current_wallpaper});
 });
 router.post("/current_wallpaper",async(req,res,next)=>{
     const person_id = res.locals.person_id;
