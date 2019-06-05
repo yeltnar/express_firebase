@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const firebase = require('firebase');
-const admin = require('firebase-admin');
+// const admin = require('firebase-admin');
 const express = require("express");
 
 const {
@@ -13,16 +13,57 @@ const {
 const {
     unprotected_router:unprotected_automatic_router
 } = require("./automatic/automatic");
+const {
+    unprotected_router:unprotected_phone_manager_router,
+    router:phone_manager_router,
+    database_watch_events:phone_manager_database_watch_events
+} = require("./phone_manager/phone_manager.js");
+
 var config = {
     // apiKey: "apiKey",
     authDomain: "express-firebase-1aa17.firebaseapp.com",
     databaseURL: "https://express-firebase-1aa17.firebaseio.com",
     // storageBucket: "bucket.appspot.com"
 };
+// console.log(functions.config().firebase);
+// process.exit();
+// firebase.initializeApp(functions.config().firebase);
 firebase.initializeApp(config);
 
 const fb_db = firebase.database();
 const app = express();
+
+
+// add database watchers
+(()=>{
+    let watch_events = [];
+    watch_events = watch_events.concat(phone_manager_database_watch_events);
+    
+    // console.log({phone_manager_database_watch_events});
+    // console.log({watch_events});
+    // process.exit();
+
+    console.log("adding database watchers");
+    watch_events.forEach((event)=>{
+        console.log(`adding '${event.export_name}' cloud function event`);
+        module.exports[event.export_name] = 
+        functions.database
+        .ref(event.ref_str)[event.watchFunctionType](event.watchFunction)
+    });
+})();
+
+module.exports.onMessageWrite = functions.database
+.ref("/date")
+.onWrite((snapshot, context)=>{
+    return new Promise((resolve, reject)=>{
+
+        console.log(snapshot);
+        console.log(context);
+        console.log("date changed!!!");
+
+        resolve();
+    });
+})
 
 const ON_CLOUD = process.env.X_GOOGLE_ENTRY_POINT !== undefined;
 
@@ -30,6 +71,8 @@ let last_date = "undefined";
 const start_date = new Date().toString();
 
 app.use( "/automatic",  unprotected_automatic_router);
+app.use( "/phone",  unprotected_phone_manager_router);
+
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
     res.json({
@@ -45,6 +88,8 @@ app.use( checkRequestObjectPersonManager );
 
 app.use( "/person_manager", person_manager_router );
 app.use( "/slack", slack_router );
+app.use( "/phone",  phone_manager_router);
+
 app.get("/runtime_vars", (req, res, next)=>{
 
     const to_send = {
@@ -77,11 +122,11 @@ app.get("/runtime_vars", (req, res, next)=>{
 
 app.get("/database", async(req, res, next)=>{
 
+    console.log("running /database");
+
     try{
 
-        await fb_db.ref("/").set({
-            "date":new Date().toString()
-        });
+        await fb_db.ref("/date").set(new Date().toString());
 
         const snapshot = await fb_db.ref('/').once('value');
 
@@ -90,8 +135,11 @@ app.get("/database", async(req, res, next)=>{
         });
 
     }catch(err){
-        res.status(500).json({"err_bool":true,err});
+        console.log(err);
+        return res.status(500).json({"err_bool":true,err});
     }
+
+    return;
 })
 
 // app.get("/stupid",(req, res, next)=>{
@@ -102,8 +150,8 @@ app.get("/env",(req, res)=>{
     res.json( process.env );
 });
 
-// exports.helloWorld = functions.https.onRequest((request, response) => {
+// module.exports.helloWorld = functions.https.onRequest((request, response) => {
 //     const date = new Date();
 //     response.json({date});
 // });
-exports.app = functions.https.onRequest( app );
+module.exports.app = functions.https.onRequest( app );
