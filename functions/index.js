@@ -16,6 +16,7 @@ const {
 const {
     unprotected_router:unprotected_phone_manager_router,
     router:phone_manager_router,
+    database_watch_events:phone_manager_database_watch_events
 } = require("./phone_manager/phone_manager.js");
 
 var config = {
@@ -32,7 +33,26 @@ firebase.initializeApp(config);
 const fb_db = firebase.database();
 const app = express();
 
-exports.onMessageWrite = functions.database
+
+// add database watchers
+(()=>{
+    let watch_events = [];
+    watch_events = watch_events.concat(phone_manager_database_watch_events);
+    
+    // console.log({phone_manager_database_watch_events});
+    // console.log({watch_events});
+    // process.exit();
+
+    console.log("adding database watchers");
+    watch_events.forEach((event)=>{
+        console.log(`adding '${event.export_name}' cloud function event`);
+        module.exports[event.export_name] = 
+        functions.database
+        .ref(event.ref_str)[event.watchFunctionType](event.watchFunction)
+    });
+})();
+
+module.exports.onMessageWrite = functions.database
 .ref("/date")
 .onWrite((snapshot, context)=>{
     return new Promise((resolve, reject)=>{
@@ -130,8 +150,8 @@ app.get("/env",(req, res)=>{
     res.json( process.env );
 });
 
-// exports.helloWorld = functions.https.onRequest((request, response) => {
+// module.exports.helloWorld = functions.https.onRequest((request, response) => {
 //     const date = new Date();
 //     response.json({date});
 // });
-exports.app = functions.https.onRequest( app );
+module.exports.app = functions.https.onRequest( app );

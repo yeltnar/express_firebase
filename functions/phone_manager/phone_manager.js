@@ -4,7 +4,8 @@ const {
     getCurrentWallpaper,
     getNewWallpaper,
     setCurrentWallpaper,
-    getDebugGlobal
+    getDebugGlobal,
+    database_watch_events
 } = require("./phone_manager_logic");
 
 const unprotected_router = express.Router();
@@ -30,10 +31,8 @@ router.get("/current_wallpaper",async(req,res,next)=>{
 });
 router.get("/new_wallpaper",async(req,res,next)=>{
     const person = res.locals.person_id;
-    const debug_result = await getNewWallpaper(person) || "no debug result";
-    res.json({debug_result});
-    // const current_wallpaper = await getNewWallpaper(person);
-    // res.json({current_wallpaper});
+    const current_wallpaper = await getNewWallpaper(person) || "no wallpaper result";
+    res.json({current_wallpaper});
 });
 router.post("/current_wallpaper",async(req,res,next)=>{
     const person_id = res.locals.person_id;
@@ -48,9 +47,16 @@ router.post("/current_wallpaper",async(req,res,next)=>{
     return res.json({current_wallpaper});
 });
 
+// setup all firebase functions to be exported
+const custom_firebase_functions = {
+    getNewWallpaper
+};
+
 module.exports = {
     unprotected_router,
     router,
+    custom_firebase_functions,
+    database_watch_events
 }
 
 function getBodyParamQueryData( req, key ){

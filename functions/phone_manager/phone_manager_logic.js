@@ -13,7 +13,7 @@ const WALLPAPER_KEY = "current_wallpaper";
 // setup function
 (async()=>{
     setImmediate(()=>{
-        setupPhoneWallpaperDBWatcher();
+        // setupPhoneWallpaperDBWatcher();
     });
 })()
 
@@ -75,7 +75,6 @@ async function setCurrentWallpaper({person_id, reddit_post, img_url}){
 
         const promise_array = [];
 
-        promise_array.push( callJoinSetWallpaper( person_id, final_img_url ) );
         promise_array.push( setDBCurrentWallpaper( person_id, final_img_url ) );
         promise_array.push( updateRecentWallpaperArray( person_id, final_img_url ) );
 
@@ -104,37 +103,6 @@ async function setCurrentWallpaper({person_id, reddit_post, img_url}){
 }
 
 const debug_global = {};
-
-// TODO use this to watch DB for change then reflect that change on phone 
-async function setupPhoneWallpaperDBWatcher(){
-    console.warn("setupPhoneWallpaperDBWatcher is not done yet");
-
-    const person_id = "drew";
-
-    try{
-        console.log("setupPhoneWallpaperDBWatcher try");
-        console.log(`${getWallpaperDBLocation(person_id)}/${WALLPAPER_KEY}`);
-
-        // console.log(JSON.parse(JSON.stringify(await getFBDB().ref( getWallpaperDBLocation(person_id) ).once('value'))));
-
-        // const ref = functions.database.ref( getWallpaperDBLocation(person_id) );
-        const ref = functions.database.ref( "/date" );
-        console.log("setupPhoneWallpaperDBWatcher after set ref");
-        // console.log(ref);
-        ref.onWrite(async(snapshot, context)=>{
-            debug_global.snapshot = snapshot;
-            debug_global.context = context;
-            console.log("\n\n\nworked");
-            console.log(debug_global);
-            console.log("\n\n\n");
-        });
-    }catch(e){
-        console.log("setupPhoneWallpaperDBWatcher catch!!!!!!!!!!!!!!!!!");
-        console.log(e);
-    }
-
-    console.log("setupPhoneWallpaperDBWatcher end");
-}
 
 async function callJoinSetWallpaper( person_id, img_url ){
     const {apikey} = getPerson( person_id ).join;
@@ -217,9 +185,9 @@ function getRedditImage( reddit_post ){
         console.log("got reddit post object");
     }else{
         throw new Error("getRedditImage can not handle post links yet");
-        const post_obj = getRedditPostFromUrl(reddit_post);
-        toReturn = getRedditImage( post_obj );
-        console.log("got reddit post url");
+        // const post_obj = getRedditPostFromUrl(reddit_post);
+        // toReturn = getRedditImage( post_obj );
+        // console.log("got reddit post url");
     }
 
     return toReturn;
@@ -232,3 +200,27 @@ async function setDBCurrentWallpaper( person_id, final_img_url ){
 async function updateRecentWallpaperArray( person_id, final_img_url ){
     console.warn("updateRecentWallpaperArray is in development ");
 }
+
+module.exports.database_watch_events= [
+    {
+        export_name:"phoneWallpaperChangeWatcher",
+        ref_str:"/{person_id}/phone/wallpaper/current_wallpaper",
+        watchFunctionType:"onWrite",
+        watchFunction:async function(change, context){
+            console.log(change);
+            console.log(context);
+
+            // Exit when the data is deleted.
+            if (!change.after.exists()) {
+                console.log("!data_snapshot.after.exists()");
+                return null;
+            }
+
+            const {person_id} = context.params;
+            const final_img_url = change.after.val();
+            console.log(`${person_id} wallpaper updated to ${final_img_url}`);
+            await callJoinSetWallpaper( person_id, final_img_url );
+            console.log("set wallpaper request made");
+        },
+    }
+];
