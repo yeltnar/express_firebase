@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const firebase = require('firebase');
 // const admin = require('firebase-admin');
 const express = require("express");
+require("./interval_file");
 
 const {
     router:person_manager_router,
@@ -138,7 +139,6 @@ app.get("/database", async(req, res, next)=>{
         console.log(err);
         return res.status(500).json({"err_bool":true,err});
     }
-
     return;
 })
 
