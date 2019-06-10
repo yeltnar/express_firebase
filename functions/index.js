@@ -19,6 +19,11 @@ const {
     router:phone_manager_router,
     database_watch_events:phone_manager_database_watch_events
 } = require("./phone_manager/phone_manager.js");
+const {
+    unprotected_router:unprotected_join_router,
+    router:join_router,
+    database_watch_events:join_database_watch_events
+} = require("./join/join.js");
 
 var config = {
     // apiKey: "apiKey",
@@ -39,6 +44,7 @@ const app = express();
 (()=>{
     let watch_events = [];
     watch_events = watch_events.concat(phone_manager_database_watch_events);
+    watch_events = watch_events.concat(join_database_watch_events);
     
     // console.log({phone_manager_database_watch_events});
     // console.log({watch_events});
@@ -73,6 +79,7 @@ const start_date = new Date().toString();
 
 app.use( "/automatic",  unprotected_automatic_router);
 app.use( "/phone",  unprotected_phone_manager_router);
+app.use( "/join",  unprotected_join_router);
 
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
@@ -90,6 +97,7 @@ app.use( checkRequestObjectPersonManager );
 app.use( "/person_manager", person_manager_router );
 app.use( "/slack", slack_router );
 app.use( "/phone",  phone_manager_router);
+app.use( "/join",  join_router);
 
 app.get("/runtime_vars", (req, res, next)=>{
 

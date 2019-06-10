@@ -1,6 +1,7 @@
 const firebase = require("firebase");
 const functions = require('firebase-functions');
 const requestP = require("request-promise-native");
+const {sendJoinMessage} = require("../join/join");
 
 const {
     getPerson
@@ -115,14 +116,13 @@ async function callJoinSetWallpaper( person_id, img_url ){
         return "apikey===undefined";
     }
 
-    const url = 
-    `https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush`
-    +`?deviceId=${deviceId}`
-    +`&wallpaper=${wallpaper}`
-    +`&lockWallpaper=${lockWallpaper}`
-    +`&apikey=${apikey}`
+    const join_obj = {
+        deviceId,
+        wallpaper,
+        lockWallpaper
+    };
 
-    return await requestP(url).then((r)=>{
+    return await sendJoinMessage( join_obj, apikey ).then((r)=>{
         return {
             join_response:JSON.parse(r)
         }
