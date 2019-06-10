@@ -23,9 +23,18 @@ router.all("/api",async(req, res, next)=>{
     const body_param_query = {...req.query, ...req.param, ...req.body};
 
     const {apikey} = res.locals.person.join;
-
-    const {deviceNames,deviceId,text,title,icon,smallicon,url,image,sound,group,category,notificationId,clipboard,file,callnumber,smsnumber,smstext,mmsfile,wallpaper,lockWallpaper,mediaVolume,ringVolume,alarmVolume,say,language,app,appPackage} = body_param_query;
     
+    const result = await sendJoinMessage(body_param_query, apikey);
+
+    res.json({
+        result
+    });
+});
+
+async function sendJoinMessage(join_obj, apikey){
+
+    const {deviceNames,deviceId,text,title,icon,smallicon,url,image,sound,group,category,notificationId,clipboard,file,callnumber,smsnumber,smstext,mmsfile,wallpaper,lockWallpaper,mediaVolume,ringVolume,alarmVolume,say,language,app,appPackage} = join_obj;
+
     let s = `https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush?`;
     if( deviceNames!==undefined ){ s+=`deviceNames=${deviceNames}&`}
     if( deviceId!==undefined ){ s+=`deviceId=${deviceId}&`}
@@ -58,14 +67,13 @@ router.all("/api",async(req, res, next)=>{
 
     const result = await requestP(s);
 
-    res.json({
-        result
-    });
-});
+    return result;
+}
 
 module.exports = {
     database_watch_events: [],
     unprotected_router,
-    router
+    router,
+    sendJoinMessage
 };
 
