@@ -10,9 +10,20 @@ router.post("/report/:device",async(req, res)=>{
     const body = req.body;
     const device = req.params.device;
     const {locals} = res;
+    const ips = req.ips;
+    const server_found_ip = (()=>{
+        return req.headers['x-forwarded-for'] || 
+        req.connection.remoteAddress || 
+        req.socket.remoteAddress ||
+        (req.connection.socket ? req.connection.socket.remoteAddress : null);
+    })();
+
+    console.log(server_found_ip);
 
     const server_report = {
-        server_timestamp: new Date().toString()
+        server_timestamp: new Date().toString(),
+        ips,
+        ip: server_found_ip
     };
 
     const report = {...body.report, ...server_report};
