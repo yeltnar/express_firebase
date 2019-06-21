@@ -39,7 +39,6 @@ firebase.initializeApp(config);
 const fb_db = firebase.database();
 const app = express();
 
-
 // add database watchers
 (()=>{
     let watch_events = [];
@@ -59,18 +58,18 @@ const app = express();
     });
 })();
 
-module.exports.onMessageWrite = functions.database
-.ref("/date")
-.onWrite((snapshot, context)=>{
-    return new Promise((resolve, reject)=>{
+// module.exports.onMessageWrite = functions.database
+// .ref("/date")
+// .onWrite((snapshot, context)=>{
+//     return new Promise((resolve, reject)=>{
 
-        console.log(snapshot);
-        console.log(context);
-        console.log("date changed!!!");
+//         console.log(snapshot);
+//         console.log(context);
+//         console.log("date changed!!!");
 
-        resolve();
-    });
-})
+//         resolve();
+//     });
+// })
 
 const ON_CLOUD = process.env.X_GOOGLE_ENTRY_POINT !== undefined;
 
