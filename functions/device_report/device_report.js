@@ -10,7 +10,12 @@ router.post("/report/:device",async(req, res)=>{
     const body = req.body;
     const device = req.params.device;
     const {locals} = res;
-    const report = body.report;
+
+    const server_report = {
+        server_timestamp: new Date().toString()
+    };
+
+    const report = {...body.report, ...server_report};
 
     const {person_id} = res.locals;
 
@@ -23,8 +28,37 @@ router.post("/report/:device",async(req, res)=>{
     })
 });
 
+router.get("/report/:device",async(req, res)=>{
+
+    const {person_id} = res.locals;
+    const device = req.params.device;
+
+    const db_obj = JSON.parse(JSON.stringify(
+        await getFBDB().ref( getDeviceReportLocation(person_id, device) ).once('value')
+    ));
+
+    res.json(db_obj);
+});
+
+router.get("/report",async(req, res)=>{
+
+    const {person_id} = res.locals;
+    const device = "all";
+
+    const db_obj = JSON.parse(JSON.stringify(
+        await getFBDB().ref( getDeviceReportLocation(person_id, device) ).once('value')
+    ));
+
+    res.json(db_obj);
+});
+
 function getDeviceReportLocation(person_id, device){
-    return `${person_id}/devices/${device}`
+
+    if(device==="all"){
+        return `${person_id}/devices`
+    }else{
+        return `${person_id}/devices/${device}`
+    }
 }
 
 module.exports = {
