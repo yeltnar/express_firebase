@@ -24,6 +24,11 @@ const {
     router:join_router,
     database_watch_events:join_database_watch_events
 } = require("./join/join.js");
+const {
+    unprotected_router:unprotected_device_report_router,
+    router:device_report_router,
+    database_watch_events:device_report_database_watch_events
+} = require("./device_report/device_report.js");
 
 var config = {
     // apiKey: "apiKey",
@@ -79,6 +84,7 @@ const start_date = new Date().toString();
 app.use( "/automatic",  unprotected_automatic_router);
 app.use( "/phone",  unprotected_phone_manager_router);
 app.use( "/join",  unprotected_join_router);
+app.use( "/device_report",  unprotected_device_report_router);
 
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
@@ -97,6 +103,7 @@ app.use( "/person_manager", person_manager_router );
 app.use( "/slack", slack_router );
 app.use( "/phone",  phone_manager_router);
 app.use( "/join",  join_router);
+app.use( "/device_report",  device_report_router);
 
 app.get("/runtime_vars", (req, res, next)=>{
 
