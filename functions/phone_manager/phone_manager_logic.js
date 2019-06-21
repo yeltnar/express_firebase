@@ -79,7 +79,7 @@ async function setCurrentWallpaper({person_id, reddit_post, img_url}){
         promise_array.push( setDBCurrentWallpaper( person_id, final_img_url ) );
         promise_array.push( updateRecentWallpaperArray( person_id, final_img_url ) );
 
-        await Promise.all();
+        await Promise.all(promise_array);
 
         success = true;
         error = false;
@@ -87,7 +87,7 @@ async function setCurrentWallpaper({person_id, reddit_post, img_url}){
     }catch(e){
         success = false;
         error = e;
-        console.error("error in setting/saving reddit image");
+        console.error(`error in setting/saving reddit image err:${e}`);
     }
 
     console.log("setCurrentWallpaper done");
