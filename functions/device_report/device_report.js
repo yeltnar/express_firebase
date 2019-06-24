@@ -23,7 +23,7 @@ router.post("/report/:device",async(req, res)=>{
     const server_report = {
         server_timestamp: new Date().toString(),
         ips,
-        ip: server_found_ip
+        server_found_ip
     };
 
     const report = {...body.report, ...server_report};
