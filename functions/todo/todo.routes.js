@@ -32,7 +32,14 @@ router.put("/item/:id", async(req, res, next)=>{
     const {todo_obj} = req.body;
     const {id} = req.params;
     const {person_id} = res.locals;
-    const saved_obj = await replaceTodo(id, todo_obj, person_id);
+    let saved_obj;
+    try{
+        saved_obj = await replaceTodo(id, todo_obj, person_id);
+    }catch(e){
+        res.status(500).json({
+            error:true,e
+        });
+    }
     res.json(saved_obj);
 });
 

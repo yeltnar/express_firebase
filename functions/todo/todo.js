@@ -45,23 +45,13 @@ async function replaceTodo(todo_id, todo_obj, person_id){
     delete todo_obj.created
 
     const skip_arr = ["created"];
-    const new_todo_obj = JSON.parse(JSON.stringify(await getTodo(todo_id, person_id)));
-    console.log(Object.keys(new_todo_obj))
-    console.log(JSON.stringify(new_todo_obj,null,2))
-
-    for( let k in new_todo_obj ){
-        if(!skip_arr.includes(k)){
-            new_todo_obj[k] = todo_obj[k]===undefined ? new_todo_obj[k] : todo_obj[k];
-        }
-    }
+    let new_todo_obj = JSON.parse(JSON.stringify(await getTodo(todo_id, person_id)));
 
     for( let k in todo_obj ){
         if(!skip_arr.includes(k)){
             new_todo_obj[k] = todo_obj[k];
         }
     }
-
-    console.log(JSON.stringify(new_todo_obj,null,2))
 
     new_todo_obj.last_modified = new Date().toISOString();
 
