@@ -142,7 +142,7 @@ async function getNewRedditPost(){
 
         const promise_array = [];
 
-        promise_array.push( getRedditPosts({sub:"mostbeautiful"}) );
+        // promise_array.push( getRedditPosts({sub:"mostbeautiful"}) );
         promise_array.push( getRedditPosts({sub:"earthporn"}) );
 
         const [mostbeautiful_posts,earthporn_posts] = await Promise.all(promise_array);
