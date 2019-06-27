@@ -29,6 +29,11 @@ const {
     router:device_report_router,
     database_watch_events:device_report_database_watch_events
 } = require("./device_report/device_report.js");
+const {
+    unprotected_router:unprotected_todo_router,
+    router:todo_router,
+    database_watch_events:todo_database_watch_events
+} = require("./todo/todo.routes.js");
 
 var config = {
     // apiKey: "apiKey",
@@ -49,6 +54,7 @@ const app = express();
     let watch_events = [];
     watch_events = watch_events.concat(phone_manager_database_watch_events);
     watch_events = watch_events.concat(join_database_watch_events);
+    watch_events = watch_events.concat(todo_database_watch_events);
     
     // console.log({phone_manager_database_watch_events});
     // console.log({watch_events});
@@ -85,6 +91,7 @@ app.use( "/automatic",  unprotected_automatic_router);
 app.use( "/phone",  unprotected_phone_manager_router);
 app.use( "/join",  unprotected_join_router);
 app.use( "/device_report",  unprotected_device_report_router);
+app.use( "/todo",  unprotected_todo_router);
 
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
@@ -104,6 +111,7 @@ app.use( "/slack", slack_router );
 app.use( "/phone",  phone_manager_router);
 app.use( "/join",  join_router);
 app.use( "/device_report",  device_report_router);
+app.use( "/todo",  todo_router);
 
 app.get("/runtime_vars", (req, res, next)=>{
 
