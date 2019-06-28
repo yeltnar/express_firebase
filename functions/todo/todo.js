@@ -19,7 +19,8 @@ async function createTodo(todo_obj, person_id){
     todo_obj.last_modified = todo_obj.created;
 
     // defaults set by the server 
-    todo_obj.due_date = todo_obj.due_date || undefined;
+    todo_obj.due_date = todo_obj.due_date || null;
+    todo_obj.parent_item = todo_obj.parent_item || null;
 
     // remove keys with undefined value
     Object.keys(todo_obj).forEach((cur)=>{

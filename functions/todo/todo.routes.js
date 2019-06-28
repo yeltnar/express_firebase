@@ -22,7 +22,7 @@ router.get("/item/:item_id", async(req, res, next)=>{
     res.json(to_do);
 });
 
-router.put("/item", async(req, res, next)=>{
+router.post("/item", async(req, res, next)=>{
     const {todo_obj} = req.body;
     const {person_id} = res.locals;
     await createTodo(todo_obj, person_id);
