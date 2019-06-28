@@ -1,23 +1,8 @@
 const express = require("express");
-const {getForecast} = require("./weather");
+const {getForecast, goodToFly} = require("./weather");
 
 const unprotected_router = express.Router();
 const router = express.Router();
-
-(()=>{
-
-    const base_url = "https://api.darksky.net";
-    const secret_key = "c56b7c2e07eae2bff0f4287969b16b55";
-    const lat = "37.8267";
-    const lon = "-122.4233";
-
-    // darkSkyRequest({base_url, query_type, secret_key, lat, lon})
-    getForecast({base_url, secret_key, lat, lon})
-    .then((result)=>{
-        console.log(typeof result);
-    });
-
-})// TODO remove;
 
 router.get("/forecast/:lat_lon", async(req, res, next)=>{
 
@@ -72,6 +57,22 @@ router.get("/:time_key/:info_keys/:lat_lon", async(req, res, next)=>{
     
 
     res.json(data_arr);
+});
+router.post("/good_to_fly/:lat_lon",async(req, res, next)=>{
+
+    const {lat, lon} =  (()=>{
+        const {lat_lon} = req.params;
+        const regex_res = /(.*),(.*)/.exec(lat_lon)
+        const lat = regex_res[1];
+        const lon = regex_res[2];
+        return {lat,lon};
+    })();
+    
+    const time_key = "hourly";
+    const {base_url,secret_key} = res.locals.person.darksky;
+
+    const good_to_fly = await goodToFly({base_url, secret_key, lat, lon, time_key});
+    res.json(good_to_fly);
 });
 
 unprotected_router.all("/t",(req, res, next)=>{
