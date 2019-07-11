@@ -151,18 +151,32 @@ app.get("/database", async(req, res, next)=>{
 
         await fb_db.ref("/date").set(new Date().toString());
 
-        const snapshot = await fb_db.ref('/').once('value');
+        let to_send = {};
 
-        res.json({
-            snapshot
-        });
+        if( req.query.data_location===undefined || req.query.data_location===null ){
+
+            to_send = await fb_db.ref('/').once('value');
+
+        }else{
+            to_send.snapshot_str 
+                = res.locals.person_id+"/"+req.query.data_location
+                .split(".")
+                .join("/")
+                .split(" ")
+                .join("/");
+                
+            to_send = await fb_db.ref( to_send.snapshot_str ).once('value');
+            // to_send.location = req.query.data_location.split(".").join("/");
+        }
+
+        res.json(to_send);
 
     }catch(err){
         console.log(err);
         return res.status(500).json({"err_bool":true,err});
     }
     return;
-})
+});
 
 // app.get("/stupid",(req, res, next)=>{
 //     res.json({r:admin.credential.applicationDefault()});
