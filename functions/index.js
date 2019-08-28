@@ -34,6 +34,9 @@ const {
     router:todo_router,
     database_watch_events:todo_database_watch_events
 } = require("./todo/todo.routes.js");
+const {
+    unprotected_router:twilio_unprotected_router
+} = require("./twilio/twilio");
 
 var config = {
     // apiKey: "apiKey",
@@ -92,6 +95,7 @@ app.use( "/phone",  unprotected_phone_manager_router);
 app.use( "/join",  unprotected_join_router);
 app.use( "/device_report",  unprotected_device_report_router);
 app.use( "/todo",  unprotected_todo_router);
+app.use( "/twilio", twilio_unprotected_router );
 
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
