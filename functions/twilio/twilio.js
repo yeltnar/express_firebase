@@ -10,6 +10,9 @@ unprotected_router.post('/call',(req, res)=>{
 
     const body = req.body;
 
+    let from_number = (body||{}).From || "no `From` number";
+
+    console.log(from_number);
     console.log({twilio_body:body});
 
     const call_msg =    
