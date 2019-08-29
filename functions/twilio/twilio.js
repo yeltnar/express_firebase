@@ -1,4 +1,5 @@
 const express = require("express");
+const {sendJoinMessage} = require('../join/join')
 
 const router = express.Router();
 const unprotected_router = express.Router();
@@ -9,13 +10,17 @@ router.get("/",(req,res)=>{
 
 router.post('/call',async (req, res)=>{
 
+    // return res.json(res.locals);
+
     const body = req.body;
+
+    sendJoinCallNotification(res.locals.person.join.apikey, body.From, res.locals)
 
     const results = await processCall(body);
 
     if( results.message!==undefined ){
         res.type('text/xml');
-        res.end(results.message); // remove this so I just get a call log
+        res.end(results.message); // remove ths so I just get a call log
     }
 });
 
@@ -80,6 +85,32 @@ const ACTION_LIST = {
 const PHONE_ACTION_TABLE = {
     '9726850799':ACTION_LIST.OPEN_GATE,
 };
+
+function sendJoinCallNotification(apikey, from_number, locals){
+
+    if( apikey===undefined ){
+        throw new Error(`apikey is ${apikey}`);
+    }
+
+    const extra_info = (()=>{
+
+        const tmp_extra_info = getAction(from_number);
+        // TODO find contact if ya want to
+        // if( tmp_extra_info===ACTION_LIST.NOT_FOUND ){
+        //     locals.person.contacts.
+        // }
+
+        return tmp_extra_info;
+    })();
+
+    const join_obj = {
+        deviceId:"group.android",
+        title:"New call",
+        text:`${extra_info} ${from_number}`,
+    };
+
+    sendJoinMessage(join_obj, apikey);
+}
 
 module.exports = {
     unprotected_router,
