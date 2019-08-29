@@ -35,7 +35,8 @@ const {
     database_watch_events:todo_database_watch_events
 } = require("./todo/todo.routes.js");
 const {
-    unprotected_router:twilio_unprotected_router
+    unprotected_router:twilio_unprotected_router,
+    router:twilio_router,
 } = require("./twilio/twilio");
 
 var config = {
@@ -116,6 +117,7 @@ app.use( "/phone",  phone_manager_router);
 app.use( "/join",  join_router);
 app.use( "/device_report",  device_report_router);
 app.use( "/todo",  todo_router);
+app.use( "/twilio", twilio_router );
 
 app.get("/runtime_vars", (req, res, next)=>{
 

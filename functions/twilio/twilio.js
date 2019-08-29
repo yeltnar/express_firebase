@@ -1,12 +1,13 @@
 const express = require("express");
 
+const router = express.Router();
 const unprotected_router = express.Router();
 
-unprotected_router.get("/",(req,res)=>{
+router.get("/",(req,res)=>{
     res.json({result:"security_hole"});
 });
 
-unprotected_router.post('/call',async (req, res)=>{
+router.post('/call',async (req, res)=>{
 
     const body = req.body;
 
@@ -46,7 +47,13 @@ async function processCall(call_body){
             // `<Say>${req.body.From}</Say>`+
             // `<Dial>xxx xxx xxx</Dial>`+
             `<Play digits="9w9w9w9"></Play>`+
-            `<Hangup></Hangup>`+
+            `<Hangup/>`+
+        `</Response>`;
+        to_return.message = call_msg;
+    }else if( action===ACTION_LIST.NOT_FOUND ){
+        const call_msg =    
+        `<Response>`+
+            `<Reject/>` +
         `</Response>`;
         to_return.message = call_msg;
     }
@@ -57,7 +64,7 @@ async function processCall(call_body){
 function getAction(phone_number){
     phone_number = simplifyPhoneNumber(phone_number);
     // return {PHONE_ACTION_TABLE,phone_number,found:PHONE_ACTION_TABLE[phone_number]}
-    return PHONE_ACTION_TABLE[phone_number]
+    return PHONE_ACTION_TABLE[phone_number] || ACTION_LIST.NOT_FOUND;
 }
 
 function simplifyPhoneNumber(phone_number){
@@ -66,7 +73,8 @@ function simplifyPhoneNumber(phone_number){
 }
 
 const ACTION_LIST = {
-    OPEN_GATE:"OPEN_GATE"
+    OPEN_GATE:"OPEN_GATE",
+    NOT_FOUND:"NOT_FOUND",
 };
 
 const PHONE_ACTION_TABLE = {
@@ -75,5 +83,5 @@ const PHONE_ACTION_TABLE = {
 
 module.exports = {
     unprotected_router,
-    router: unprotected_router
+    router
 };
