@@ -24,7 +24,7 @@ async function getPhoneActionTable(locals){
 
     return final_phone_action_table;
 
-};
+}
 
 router.get("/",(req,res)=>{
     res.json({result:"security_hole"});
