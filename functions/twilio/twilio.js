@@ -1,8 +1,30 @@
 const express = require("express");
 const {sendJoinMessage} = require('../join/join')
+const firebase = require("firebase");
 
 const router = express.Router();
 const unprotected_router = express.Router();
+
+const getFBDB = firebase.database;
+
+async function getPhoneActionTable(locals){
+
+    console.log(locals);
+
+    let database_phone_action_table = JSON.parse(JSON.stringify(
+        await getFBDB().ref( `${locals.person_id}/twilio` ).once('value')
+    ));
+
+    const {phone_action_table} = locals.person.twilio
+
+    const final_phone_action_table = phone_action_table.reduce((acc,cur,i,arr)=>{
+        acc[cur.number] = cur.action;
+        return acc;
+    },database_phone_action_table);
+
+    return final_phone_action_table;
+
+};
 
 router.get("/",(req,res)=>{
     res.json({result:"security_hole"});
@@ -16,7 +38,9 @@ router.post('/call',async (req, res)=>{
 
     sendJoinCallNotification(res.locals.person.join.apikey, body.From, res.locals)
 
-    const results = await processCall(body);
+    const phone_action_table = await getPhoneActionTable(res.locals);
+
+    const results = await processCall(body, phone_action_table);
 
     if( results.message!==undefined ){
         res.type('text/xml');
@@ -24,7 +48,7 @@ router.post('/call',async (req, res)=>{
     }
 });
 
-async function processCall(call_body){
+async function processCall(call_body, phone_action_table){
 
     const to_return = {};
 
@@ -37,7 +61,7 @@ async function processCall(call_body){
     }
     
     const from_number = call_body.From;
-    const action = getAction(from_number);
+    const action = getAction(from_number, phone_action_table);
 
     // return {action,from_number}
 
@@ -55,7 +79,7 @@ async function processCall(call_body){
             `<Hangup/>`+
         `</Response>`;
         to_return.message = call_msg;
-    }else if( action===ACTION_LIST.NOT_FOUND ){
+    }else if( action===ACTION_LIST.NOT_FOUND || action===ACTION_LIST.WEBEX || action===ACTION_LIST.DREW ){
         const call_msg =    
         `<Response>`+
             `<Reject/>` +
@@ -66,10 +90,10 @@ async function processCall(call_body){
     return to_return;
 }
 
-function getAction(phone_number){
+function getAction(phone_number, phone_action_table){
     phone_number = simplifyPhoneNumber(phone_number);
     // return {PHONE_ACTION_TABLE,phone_number,found:PHONE_ACTION_TABLE[phone_number]}
-    return PHONE_ACTION_TABLE[phone_number] || ACTION_LIST.NOT_FOUND;
+    return phone_action_table[phone_number] || ACTION_LIST.NOT_FOUND;
 }
 
 function simplifyPhoneNumber(phone_number){
@@ -80,21 +104,22 @@ function simplifyPhoneNumber(phone_number){
 const ACTION_LIST = {
     OPEN_GATE:"OPEN_GATE",
     NOT_FOUND:"NOT_FOUND",
+    WEBEX:"WEBEX",
+    DREW:"DREW",
+    JULIE:"JULIE",
 };
 
-const PHONE_ACTION_TABLE = {
-    '9726850799':ACTION_LIST.OPEN_GATE,
-};
-
-function sendJoinCallNotification(apikey, from_number, locals){
+async function sendJoinCallNotification(apikey, from_number, locals){
 
     if( apikey===undefined ){
         throw new Error(`apikey is ${apikey}`);
     }
 
+    const phone_action_table = await getPhoneActionTable(locals);
+
     const extra_info = (()=>{
 
-        const tmp_extra_info = getAction(from_number);
+        const tmp_extra_info = getAction(from_number, phone_action_table);
         // TODO find contact if ya want to
         // if( tmp_extra_info===ACTION_LIST.NOT_FOUND ){
         //     locals.person.contacts.
