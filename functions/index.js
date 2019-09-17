@@ -178,6 +178,51 @@ app.get("/database", async(req, res, next)=>{
     return;
 });
 
+app.post("/database", async(req, res, next)=>{
+
+    console.log("running /database");
+
+    try{
+
+        await fb_db.ref("/date").set(new Date().toString());
+
+        let to_send = {};
+
+        if( (req.query.data_location===undefined || req.query.data_location===null) ){
+
+            to_send = await fb_db.ref('/').once('value');
+
+        }else if(req.query.value!==undefined && req.query.value!==null){
+            to_send.snapshot_str 
+                = res.locals.person_id+"/"+req.query.data_location
+                .split(".")
+                .join("/")
+                .split(" ")
+                .join("/");
+
+            let set_val;
+
+            try{
+                set_val = JSON.parse(req.query.value);
+            }catch(e){
+                set_val = req.query.value === undefined?"---undefined---":req.query.value;
+            }
+                
+            to_send = await fb_db.ref( to_send.snapshot_str ).set(set_val);
+            
+        }else{
+            to_send = {"err":"true-iovdsn'oierw098"};
+        }
+
+        res.json(to_send);
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({"err_bool":true,err});
+    }
+    return;
+});
+
 // app.get("/stupid",(req, res, next)=>{
 //     res.json({r:admin.credential.applicationDefault()});
 // });
