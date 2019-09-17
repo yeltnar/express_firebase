@@ -175,6 +175,53 @@ app.get("/database", async(req, res, next)=>{
             // to_send.location = req.query.data_location.split(".").join("/");
         }
 
+        res.set("Access-Control-Allow-Origin","http://localhost:3000");
+        res.json(to_send);
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({"err_bool":true,err});
+    }
+    return;
+});
+
+app.post("/database", async(req, res, next)=>{
+
+    console.log("running /database");
+
+    try{
+
+        await fb_db.ref("/date").set(new Date().toString());
+
+        let to_send = {};
+
+        if( (req.query.data_location===undefined || req.query.data_location===null) ){
+
+            to_send = await fb_db.ref('/').once('value');
+
+        }else if(req.query.value!==undefined && req.query.value!==null){
+            to_send.snapshot_str 
+                = res.locals.person_id+"/"+req.query.data_location
+                .split(".")
+                .join("/")
+                .split(" ")
+                .join("/");
+
+            let set_val;
+
+            try{
+                set_val = JSON.parse(req.query.value);
+            }catch(e){
+                set_val = req.query.value === undefined?"---undefined---":req.query.value;
+            }
+                
+            await fb_db.ref( to_send.snapshot_str ).set(set_val);
+            to_send = set_val;
+            
+        }else{
+            to_send = {"err":"true-iovdsn'oierw098"};
+        }
+
         res.json(to_send);
 
     }catch(err){
