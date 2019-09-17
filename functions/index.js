@@ -169,6 +169,7 @@ app.get("/database", async(req, res, next)=>{
             // to_send.location = req.query.data_location.split(".").join("/");
         }
 
+        res.set("Access-Control-Allow-Origin","http://localhost:3000");
         res.json(to_send);
 
     }catch(err){
@@ -208,7 +209,8 @@ app.post("/database", async(req, res, next)=>{
                 set_val = req.query.value === undefined?"---undefined---":req.query.value;
             }
                 
-            to_send = await fb_db.ref( to_send.snapshot_str ).set(set_val);
+            await fb_db.ref( to_send.snapshot_str ).set(set_val);
+            to_send = set_val;
             
         }else{
             to_send = {"err":"true-iovdsn'oierw098"};
