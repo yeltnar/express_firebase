@@ -51,8 +51,11 @@ function getPerson( person_id ){
 
 function checkRequestObject( req, res, next  ){
 
-    const person_id = req.body.person_id || req.params.person_id || req.query.person_id;
-    const token = req.body.token || req.params.token || req.query.token;
+
+    const [header_person_id, header_token] = Buffer.from(req.headers.authorization.split('Basic ')[1], 'base64').toString().split(":");
+
+    const person_id = header_person_id || req.body.person_id || req.params.person_id || req.query.person_id;
+    const token = header_token || req.body.token || req.params.token || req.query.token;
 
     if( person_id===undefined ){
         return res.status(500).json({person_id:"undefined"});
