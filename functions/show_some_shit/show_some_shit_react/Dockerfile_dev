@@ -1,0 +1,6 @@
+# clear && docker build -t show_some_shit_dev -f Dockerfile_dev . && docker run -v $(pwd)/src:/usr/src/app/src -v $(pwd)/public:/usr/src/app/public -p 3000:3000 show_some_shit_dev
+FROM show_some_shit_base
+
+EXPOSE 3000
+
+CMD npm start
