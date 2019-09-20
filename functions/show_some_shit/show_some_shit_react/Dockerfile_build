@@ -1,5 +1,4 @@
-FROM show_some_shit_base
-
 # clear && docker build -t show_some_shit_build -f Dockerfile_build . && docker run show_some_shit_build -v $(pwd)/build:/usr/src/app/build
+FROM show_some_shit_base
 
 CMD npm run build
