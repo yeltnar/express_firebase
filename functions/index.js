@@ -38,6 +38,10 @@ const {
     unprotected_router:twilio_unprotected_router,
     router:twilio_router,
 } = require("./twilio/twilio");
+const {
+    unprotected_router:show_some_shit_unprotected_router,
+    router:show_some_shit_router,
+} = require("./show_some_shit/server/show_some_shit");
 
 var config = {
     // apiKey: "apiKey",
@@ -97,6 +101,7 @@ app.use( "/join",  unprotected_join_router);
 app.use( "/device_report",  unprotected_device_report_router);
 app.use( "/todo",  unprotected_todo_router);
 app.use( "/twilio", twilio_unprotected_router );
+app.use( "/show_some_shit", show_some_shit_unprotected_router );
 
 app.get("/timestamp",(req, res, next)=>{
     const date = new Date().toString();
@@ -118,6 +123,7 @@ app.use( "/join",  join_router);
 app.use( "/device_report",  device_report_router);
 app.use( "/todo",  todo_router);
 app.use( "/twilio", twilio_router );
+app.use( "/show_some_shit", show_some_shit_router );
 
 app.get("/runtime_vars", (req, res, next)=>{
 
@@ -176,6 +182,7 @@ app.get("/database", async(req, res, next)=>{
         }
 
         res.set("Access-Control-Allow-Origin","http://localhost:3000");
+        res.set("Access-Control-Allow-Origin","http://localhost:5000");
         res.json(to_send);
 
     }catch(err){

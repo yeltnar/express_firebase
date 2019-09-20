@@ -1,0 +1,8 @@
+FROM show_some_shit_base
+
+RUN pwd && ls
+RUN npm i react-scripts
+
+# clear && docker build -t show_some_shit_build -f Dockerfile_build . && docker run show_some_shit_build -v $(pwd)/build:/usr/src/app/build
+
+CMD npm run build
