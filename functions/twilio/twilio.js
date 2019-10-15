@@ -79,7 +79,7 @@ async function processCall(call_body, phone_action_table){
             `<Hangup/>`+
         `</Response>`;
         to_return.message = call_msg;
-    }else if( action===ACTION_LIST.NOT_FOUND || action===ACTION_LIST.WEBEX || action===ACTION_LIST.DREW ){
+    }else if( action===ACTION_LIST.NOT_FOUND || action===ACTION_LIST.WEBEX || action===ACTION_LIST.DREW || action===ACTION_LIST.REJECT ){
         const call_msg =    
         `<Response>`+
             `<Reject/>` +
@@ -104,6 +104,7 @@ function simplifyPhoneNumber(phone_number){
 const ACTION_LIST = {
     OPEN_GATE:"OPEN_GATE",
     NOT_FOUND:"NOT_FOUND",
+    REJECT:"REJECT",
     WEBEX:"WEBEX",
     DREW:"DREW",
     JULIE:"JULIE",
