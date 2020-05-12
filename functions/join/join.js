@@ -1,5 +1,6 @@
 const express = require("express");
 const requestP = require("request-promise-native");
+const {getPerson} = require("../person_manager/person_manager.js");
 
 const unprotected_router = express.Router();
 const router = express.Router();
@@ -74,8 +75,55 @@ async function sendJoinMessage(join_obj, apikey){
     return result;
 }
 
+const database_watch_events = [];
+
+database_watch_events.push({
+    export_name:"notificationChangeWatcher",
+    ref_str:"/{person_id}/phone/notifications",
+    watchFunctionType:"onWrite",
+    watchFunction:async function(change, context){
+        console.log(change);
+        console.log(context);
+
+        // Exit when the data is deleted.
+        if (!change.after.exists()) {
+            console.log("!data_snapshot.after.exists()");
+            return null;
+        }
+
+        const {person_id} = context.params;
+        const new_val = change.after.val();
+        console.log(`${person_id} notification ${JSON.stringify(new_val,null,2)}`);
+        await callUpdateNotifications( person_id );
+    },
+});
+
+async function callUpdateNotifications( person_id ){
+    const {apikey} = getPerson( person_id ).join;
+    
+    const deviceId = "group.android";
+    const text = `=:=update_notifications`;
+
+    if( apikey===undefined ){
+        return "apikey===undefined";
+    }
+
+    const join_obj = {
+        deviceId,
+        text
+    };
+
+    console.log({join_obj});
+
+    return await sendJoinMessage( join_obj, apikey ).then((r)=>{
+        return {
+            join_response:JSON.parse(r)
+        }
+    });
+}
+
 module.exports = {
-    database_watch_events: [],
+    database_watch_events: database_watch_events,
     unprotected_router,
     router,
     sendJoinMessage

@@ -149,7 +149,7 @@ app.get("/runtime_vars", (req, res, next)=>{
     
 });
 
-app.get("/database", async(req, res, next)=>{
+app.get(["/database","/database.json"], async(req, res, next)=>{
 
     console.log("running /database");
 
@@ -175,8 +175,19 @@ app.get("/database", async(req, res, next)=>{
             // to_send.location = req.query.data_location.split(".").join("/");
         }
 
-        res.set("Access-Control-Allow-Origin","http://localhost:3000");
-        res.json(to_send);
+        if( req.query.file===true || req.query.file==="true" ){
+            const pre_string = typeof req.query.pre_string!=="string"?"":req.query.pre_string;
+            const file_name = to_send.snapshot_str!==undefined ? pre_string+to_send.snapshot_str.split("/").join(".") : "data";
+            res.setHeader('Content-type', "application/octet-stream");
+            res.setHeader('Content-disposition', `attachment; filename=${file_name}.json`);
+            res.setHeader('test', `${typeof req.query.pre_string}`);
+            res.set("Access-Control-Allow-Origin","*");
+            res.send(to_send);
+            return;
+        }else{
+            res.set("Access-Control-Allow-Origin","*");
+            res.json(to_send);
+        }
 
     }catch(err){
         console.log(err);
@@ -222,6 +233,7 @@ app.post("/database", async(req, res, next)=>{
             to_send = {"err":"true-iovdsn'oierw098"};
         }
 
+        res.set("Access-Control-Allow-Origin","*");
         res.json(to_send);
 
     }catch(err){
