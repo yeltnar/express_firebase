@@ -50,9 +50,10 @@ function getPerson( person_id ){
 }
 
 function checkRequestObject( req, res, next  ){
+    const header = req.header("test-header")
 
-    const person_id = req.body.person_id || req.params.person_id || req.query.person_id;
-    const token = req.body.token || req.params.token || req.query.token;
+    const person_id = req.header("person_id") || req.body.person_id || req.params.person_id || req.query.person_id;
+    const token = req.header("token") || req.body.token || req.params.token || req.query.token;
 
     if( person_id===undefined ){
         return res.status(500).json({person_id:"undefined"});
