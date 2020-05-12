@@ -5,10 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "firebase functions:config:get > functions/.runtimeconfig.json && firebase serve",
-    "deploy": "firebase deploy",
+    "deploy": "nvm use 8 && firebase deploy",
     "_set_example": "firebase functions:config:set x.y='asdff'",
     "set_variables": "./set_variables.sh"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^7.6.1"
+  }
 }
